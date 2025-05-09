@@ -6,7 +6,9 @@
 }
 
 body {
-    font-family: 'Comic Sans MS', cursive, sans-serif;
+    /* Apply a consistent font type to all elements */
+* {
+    font-family: 'Arial', sans-serif; /* Replace 'Arial' with the font of your choice */
     line-height: 1.6;
     background-color: #f0f9ff;
     color: #333;
