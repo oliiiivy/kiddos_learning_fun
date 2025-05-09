@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>廣東話認字遊戲</title>
+    <style>
+        :root {
+            --card-size: min(20vw, 150px);
+            --font-size: min(6vw, 40px);
+        }
+
+        body {
+            background-color: #FFEEDD;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            padding: 10px;
+            touch-action: manipulation;
+        }
+
+        #cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(var(--card-size), 1fr));
+            gap: 10px;
+            width: 100%;
+            max-width: 800px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .word-card {
+            width: var(--card-size);
+            height: calc(var(--card-size) * 1.2);
+            background-color: #fff;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: var(--font-size);
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+            touch-action: manipulation;
+        }
+
+        .word-card:active {
+            transform: scale(0.95);
+        }
+
+        #gun {
+            width: min(30vw, 150px);
+            height: auto;
+            margin: 20px 0;
+            touch-action: manipulation;
+            transition: transform 0.1s;
+        }
+
+        #timer {
+            font-size: min(10vw, 50px);
+            color: red;
+            margin: 10px 0;
+        }
+
+        .fire-effect {
+            position: absolute;
+            width: min(20vw, 100px);
+            height: auto;
+            background: url('https://cdn-icons-png.flaticon.com/512/93/93634.png') center/contain;
+            animation: fire 0.3s ease-out;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        .congrats {
+            font-size: min(10vw, 60px);
+            color: #FF6B6B;
+            animation: bounce 1s infinite;
+            position: fixed;
+            top: 20%;
+            display: none;
+            text-align: center;
+            padding: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        #startButton {
+            padding: 15px 30px;
+            font-size: 24px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 20px;
+        }
+
+        .warning {
+            color: red;
+            text-align: center;
+            padding: 10px;
+            display: none;
+        }
+
+        @keyframes fire {
+            0% { opacity: 1; transform: translateY(0) scale(0.5); }
+            50% { opacity: 1; transform: translateY(-50px) scale(1.2); }
+            100% { opacity: 0; transform: translateY(-100px) scale(0.8); }
+        }
+
+        @keyframes gunRecoil {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0); }
+        }
+
+        @media (orientation: portrait) {
+            #cards-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="warning" id="voiceWarning">⚠️ 請允許瀏覽器語音權限並點擊啟動按鈕</div>
+    <button id="startButton">點這裡開始遊戲</button>
+    <div id="timer"></div>
+    <div id="cards-container"></div>
+    <img id="gun" src="https://cdn-icons-png.flaticon.com/512/1041/1041916.png" alt="手槍">
+    <div class="congrats"></div>
+
+    <script>
+        const words = ['媽媽', '爸爸', '哥哥', '妹妹', '弟弟', '姐姐'];
+        const congratsMessages = ['AMAZING!', '叻叻！', '太棒了！', '好犀利！', '真聰明！', '好叻啊！', '一百分！'];
+        let currentTarget = '';
+        let timer;
+        let isSpeaking = false;
+        let isGameStarted = false;
+
+        function checkSpeechSupport() {
+            if (!window.speechSynthesis) {
+                document.getElementById('voiceWarning').style.display = 'block';
+                return false;
+            }
+            return true;
+        }
+
+        document.getElementById('startButton').onclick = () => {
+            if(checkSpeechSupport()) {
+                document.getElementById('startButton').style.display = 'none';
+                document.getElementById('voiceWarning').style.display = 'none';
+                document.getElementById('gun').style.display = 'block'; // 顯示手槍
+                isGameStarted = true;
+                initGame();
+            }
+        };
+
+        async function initGame() {
+            if(!isGameStarted) return;
+            
+            clearInterval(timer);
+            window.speechSynthesis.cancel();
+            isSpeaking = false;
+            const container = document.getElementById('cards-container');
+            container.innerHTML = '';
+            currentTarget = words[Math.floor(Math.random() * words.length)];
+
+            // 生成字卡
+            words.forEach(word => {
+                const card = document.createElement('div');
+                card.className = 'word-card';
+                card.textContent = word;
+                card.style.backgroundColor = `hsl(${Math.random() * 360}, 70%, 80%)`;
+                
+                // 事件綁定修正
+                const handler = (e) => {
+                    e.preventDefault();
+                    if(!isSpeaking) checkAnswer(word);
+                };
+                card.onclick = handler;
+                card.ontouchstart = handler;
+                
+                container.appendChild(card);
+            });
+
+            await speak(currentTarget, 2);
+        }
+
+        function speak(word, times) {
+            return new Promise((resolve) => {
+                isSpeaking = true;
+                let speakCount = 0;
+
+                const speakLoop = () => {
+                    if (speakCount < times) {
+                        const msg = new SpeechSynthesisUtterance(word);
+                        msg.lang = 'zh-HK';
+                        
+                        msg.onerror = (e) => {
+                            console.error('語音錯誤:', e.error);
+                            document.getElementById('voiceWarning').style.display = 'block';
+                        };
+                        
+                        msg.onend = () => {
+                            speakCount++;
+                            if(speakCount < times) {
+                                setTimeout(speakLoop, 800);
+                            } else {
+                                isSpeaking = false;
+                                startTimer();
+                                resolve();
+                            }
+                        };
+                        window.speechSynthesis.speak(msg);
+                    }
+                };
+                
+                speakLoop();
+            });
+        }
+
+        function startTimer() {
+            let timeLeft = 10;
+            document.getElementById('timer').textContent = timeLeft;
+            
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    alert('再試一次！');
+                    initGame();
+                }
+            }, 1000);
+        }
+
+        function checkAnswer(selectedWord) {
+            clearInterval(timer);
+            
+            // 手槍特效
+            const gun = document.getElementById('gun');
+            gun.style.animation = 'gunRecoil 0.3s';
+            setTimeout(() => gun.style.animation = '', 300);
+
+            // 火焰特效
+            const fire = document.createElement('div');
+            fire.className = 'fire-effect';
+            const gunRect = gun.getBoundingClientRect();
+            fire.style.left = `${gunRect.left + gunRect.width/2 - 50}px`;
+            fire.style.top = `${gunRect.top}px`;
+            document.body.appendChild(fire);
+
+            if (selectedWord === currentTarget) {
+                const congrats = document.querySelector('.congrats');
+                congrats.textContent = congratsMessages[Math.floor(Math.random()*congratsMessages.length)];
+                congrats.style.display = 'block';
+                
+                setTimeout(() => {
+                    congrats.style.display = 'none';
+                    fire.remove();
+                    initGame();
+                }, 2000);
+            } else {
+                alert('再想一想～');
+                setTimeout(() => {
+                    fire.remove();
+                    initGame();
+                }, 500);
+            }
+        }
+
+        // 初始化設定
+        document.getElementById('gun').style.display = 'none'; // 初始隱藏手槍
+        document.addEventListener('dblclick', (e) => e.preventDefault());
+        checkSpeechSupport();
+    </script>
+</body>
+</html>

@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Chinese Challenge - Children's Learning Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .chinese-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4ecdc4;
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            margin-bottom: 20px;
+            transition: 0.3s;
+        }
+
+        .back-button:hover {
+            background-color: #45b7af;
+            transform: scale(1.05);
+        }
+
+        .challenge-section {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .challenge-title {
+            color: #4ecdc4;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        #cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 30px;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+        }
+
+        .word-card {
+            width: 150px;
+            height: 180px;
+            background-color: #fff;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: transform 0.2s, opacity 0.3s;
+            margin: 0 auto;
+            position: relative;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .word-card::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 20px;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .word-card::before {
+            content: '';
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 10px;
+            height: 5px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 50%;
+        }
+
+        .word-card:active {
+            transform: scale(0.95) translateY(5px);
+        }
+
+        .word-card.correct {
+            animation: pop 0.5s forwards;
+        }
+
+        .toy-gun {
+            width: 150px;
+            height: auto;
+            margin: 20px auto;
+            display: block;
+            transition: transform 0.1s;
+            cursor: pointer;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+        }
+
+        .toy-gun:active {
+            transform: translateY(10px) rotate(-5deg);
+        }
+
+        .fire-effect {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, 
+                rgba(255, 255, 0, 0.8) 0%,
+                rgba(255, 165, 0, 0.8) 30%,
+                rgba(255, 69, 0, 0.8) 60%,
+                rgba(255, 0, 0, 0.8) 100%);
+            border-radius: 50%;
+            animation: fire 0.5s ease-out;
+            pointer-events: none;
+            opacity: 0;
+            z-index: 100;
+            box-shadow: 0 0 20px rgba(255, 69, 0, 0.6);
+        }
+
+        @keyframes fire {
+            0% { 
+                opacity: 1; 
+                transform: scale(0.5) rotate(0deg);
+                filter: blur(0px);
+            }
+            50% { 
+                opacity: 1; 
+                transform: scale(1.2) rotate(180deg);
+                filter: blur(2px);
+            }
+            100% { 
+                opacity: 0; 
+                transform: scale(0.8) rotate(360deg);
+                filter: blur(4px);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes pop {
+            0% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% { 
+                transform: scale(1.2);
+                opacity: 0.8;
+            }
+            100% { 
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+
+        .game-complete {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            text-align: center;
+            display: none;
+            z-index: 1000;
+        }
+
+        .game-complete h2 {
+            color: #4ecdc4;
+            margin-bottom: 20px;
+        }
+
+        .restart-button {
+            padding: 12px 25px;
+            font-size: 1.2rem;
+            background: linear-gradient(#4ecdc4, #45b7af);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .restart-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        #timer {
+            font-size: 2rem;
+            color: #ff6b6b;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .score-display {
+            font-size: 1.5rem;
+            color: #4ecdc4;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .congrats {
+            font-size: 2rem;
+            color: #ff6b6b;
+            animation: bounce 1s infinite;
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            text-align: center;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        .start-challenge-button {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            background: linear-gradient(#4ecdc4, #45b7af);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 20px auto;
+            display: block;
+            transition: 0.3s;
+        }
+
+        .start-challenge-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .warning {
+            color: #ff6b6b;
+            text-align: center;
+            padding: 10px;
+            display: none;
+            background-color: #fff;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .word-card:nth-child(odd) {
+            animation-delay: 0.5s;
+        }
+
+        .word-card:nth-child(3n) {
+            animation-delay: 1s;
+        }
+
+        .word-card:nth-child(3n+1) {
+            animation-delay: 1.5s;
+        }
+
+        @media (max-width: 768px) {
+            #cards-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .word-card {
+                width: 120px;
+                height: 150px;
+                font-size: 2rem;
+            }
+        }
+
+        .timer-paused {
+            color: #999;
+            position: relative;
+        }
+
+        .timer-paused::after {
+            content: '⏸';
+            position: absolute;
+            right: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+        }
+
+        .resume-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            text-align: center;
+            display: none;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -60%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-button">← Back to Home</a>
+        
+        <div class="chinese-container">
+            <div class="challenge-section">
+                <h2 class="challenge-title">Weekly Chinese Challenge</h2>
+                <div class="score-display">Total Score: <span id="totalScore">0</span></div>
+                <div class="warning" id="voiceWarning">⚠️ Please allow browser voice permissions and click the start button</div>
+                <button class="start-challenge-button" id="startButton">Start Challenge</button>
+                <div id="timer"></div>
+                <div id="cards-container"></div>
+                <img src="images/toy-gun.png" 
+                     alt="Toy Gun" class="toy-gun" id="toyGun">
+                <div class="congrats"></div>
+                <div class="resume-message" id="resumeMessage">
+                    <h3>Game Paused</h3>
+                    <p>Click anywhere to resume</p>
+                </div>
+                <div class="game-complete" id="gameComplete">
+                    <h2>Congratulations! 🎉</h2>
+                    <p>You've completed all the words!</p>
+                    <p>Final Score: <span id="finalScore">0</span></p>
+                    <button class="restart-button" onclick="restartGame()">Play Again</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add audio element for balloon pop sound with multiple formats -->
+    <audio id="balloonPopSound" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" type="audio/mpeg">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2571/2571.wav" type="audio/wav">
+    </audio>
+
+    <script>
+        const challengeWords = ['媽媽', '爸爸', '哥哥', '妹妹', '弟弟', '姐姐'];
+        const congratsMessages = ['AMAZING!', '叻叻！', '太棒了！', '好犀利！', '真聰明！', '好叻啊！', '一百分！'];
+        let currentTarget = '';
+        let timer;
+        let isSpeaking = false;
+        let isGameStarted = false;
+        let totalScore = 0;
+        let timeBonus = 0;
+        let remainingWords = [];
+        let timeLeft = 10;
+        let isPaused = false;
+        let idleTimer;
+        const IDLE_TIMEOUT = 5000; // 5 seconds of inactivity
+
+        function resetIdleTimer() {
+            if (isGameStarted && !isPaused) {
+                clearTimeout(idleTimer);
+                idleTimer = setTimeout(() => {
+                    pauseGame();
+                }, IDLE_TIMEOUT);
+            }
+        }
+
+        function pauseGame() {
+            if (!isGameStarted || isPaused) return;
+            
+            isPaused = true;
+            clearInterval(timer);
+            document.getElementById('timer').classList.add('timer-paused');
+            document.getElementById('resumeMessage').style.display = 'block';
+        }
+
+        function resumeGame() {
+            if (!isGameStarted || !isPaused) return;
+            
+            isPaused = false;
+            document.getElementById('timer').classList.remove('timer-paused');
+            document.getElementById('resumeMessage').style.display = 'none';
+            startTimer();
+            resetIdleTimer();
+        }
+
+        // Add event listeners for user activity
+        ['mousemove', 'mousedown', 'keypress', 'touchstart'].forEach(event => {
+            document.addEventListener(event, () => {
+                if (isPaused) {
+                    resumeGame();
+                } else {
+                    resetIdleTimer();
+                }
+            });
+        });
+
+        function checkSpeechSupport() {
+            if (!window.speechSynthesis) {
+                document.getElementById('voiceWarning').style.display = 'block';
+                return false;
+            }
+            return true;
+        }
+
+        document.getElementById('startButton').onclick = () => {
+            if(checkSpeechSupport()) {
+                document.getElementById('startButton').style.display = 'none';
+                document.getElementById('voiceWarning').style.display = 'none';
+                isGameStarted = true;
+                initGame();
+            }
+        };
+
+        async function initGame() {
+            if(!isGameStarted) return;
+            
+            clearInterval(timer);
+            window.speechSynthesis.cancel();
+            isSpeaking = false;
+            isPaused = false;
+            timeLeft = 10;
+            document.getElementById('timer').classList.remove('timer-paused');
+            document.getElementById('resumeMessage').style.display = 'none';
+            
+            const container = document.getElementById('cards-container');
+            container.innerHTML = '';
+            
+            // Reset remaining words if empty
+            if (remainingWords.length === 0) {
+                remainingWords = [...challengeWords];
+            }
+            
+            // Select random word from remaining words
+            const randomIndex = Math.floor(Math.random() * remainingWords.length);
+            currentTarget = remainingWords[randomIndex];
+            remainingWords.splice(randomIndex, 1);
+
+            // Create cards for remaining words
+            challengeWords.forEach((word, index) => {
+                const card = document.createElement('div');
+                card.className = 'word-card';
+                card.textContent = word;
+                // Generate pastel colors for balloons
+                const hue = (index * 60) % 360;
+                card.style.backgroundColor = `hsl(${hue}, 70%, 80%)`;
+                
+                const handler = (e) => {
+                    e.preventDefault();
+                    if(!isSpeaking && !isPaused) checkAnswer(word, card);
+                };
+                card.onclick = handler;
+                card.ontouchstart = handler;
+                
+                container.appendChild(card);
+            });
+
+            await speak(currentTarget);
+            resetIdleTimer();
+        }
+
+        function speak(word) {
+            return new Promise((resolve) => {
+                isSpeaking = true;
+                const msg = new SpeechSynthesisUtterance(word);
+                msg.lang = 'zh-HK';
+                
+                msg.onerror = (e) => {
+                    console.error('Speech error:', e.error);
+                    document.getElementById('voiceWarning').style.display = 'block';
+                };
+                
+                msg.onend = () => {
+                    isSpeaking = false;
+                    startTimer();
+                    resolve();
+                };
+                
+                window.speechSynthesis.speak(msg);
+            });
+        }
+
+        function startTimer() {
+            document.getElementById('timer').textContent = timeLeft;
+            
+            timer = setInterval(() => {
+                if (!isPaused) {
+                    timeLeft--;
+                    document.getElementById('timer').textContent = timeLeft;
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        alert('Try again!');
+                        initGame();
+                    }
+                }
+            }, 1000);
+        }
+
+        function initAudio() {
+            const popSound = document.getElementById('balloonPopSound');
+            // Load the audio
+            popSound.load();
+            // Enable audio context on user interaction
+            document.addEventListener('click', function initAudioContext() {
+                if (popSound.paused) {
+                    popSound.play().then(() => {
+                        popSound.pause();
+                        popSound.currentTime = 0;
+                    }).catch(error => console.log('Error initializing audio:', error));
+                }
+                document.removeEventListener('click', initAudioContext);
+            }, { once: true });
+        }
+
+        function checkAnswer(selectedWord, card) {
+            if (isPaused) return;
+            
+            clearInterval(timer);
+            clearTimeout(idleTimer);
+            timeBonus = parseInt(document.getElementById('timer').textContent);
+            
+            // Play balloon pop sound with improved error handling
+            const popSound = document.getElementById('balloonPopSound');
+            popSound.currentTime = 0;
+            const playPromise = popSound.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log('Error playing sound:', error);
+                    // Try to play again if it fails
+                    setTimeout(() => {
+                        popSound.currentTime = 0;
+                        popSound.play().catch(e => console.log('Second attempt failed:', e));
+                    }, 100);
+                });
+            }
+            
+            // Add fire effect
+            const fire = document.createElement('div');
+            fire.className = 'fire-effect';
+            const cardRect = card.getBoundingClientRect();
+            fire.style.left = `${cardRect.left + cardRect.width/2 - 40}px`;
+            fire.style.top = `${cardRect.top + cardRect.height/2 - 40}px`;
+            document.body.appendChild(fire);
+            
+            // Animate toy gun
+            const gun = document.getElementById('toyGun');
+            gun.style.transform = 'translateY(10px) rotate(-5deg)';
+            setTimeout(() => {
+                gun.style.transform = '';
+                // Remove fire effect after animation
+                setTimeout(() => fire.remove(), 500);
+            }, 100);
+            
+            if (selectedWord === currentTarget) {
+                const congrats = document.querySelector('.congrats');
+                congrats.textContent = congratsMessages[Math.floor(Math.random()*congratsMessages.length)];
+                congrats.style.display = 'block';
+                
+                // Update score
+                totalScore += 10 + timeBonus;
+                document.getElementById('totalScore').textContent = totalScore;
+                
+                // Mark card as correct and remove it
+                card.classList.add('correct');
+                setTimeout(() => {
+                    card.remove();
+                    congrats.style.display = 'none';
+                    
+                    // Check if game is complete
+                    if (remainingWords.length === 0) {
+                        showGameComplete();
+                    } else {
+                        initGame();
+                    }
+                }, 1000);
+            } else {
+                alert('Think again!');
+                setTimeout(() => {
+                    initGame();
+                }, 500);
+            }
+        }
+
+        function showGameComplete() {
+            document.getElementById('finalScore').textContent = totalScore;
+            document.getElementById('gameComplete').style.display = 'block';
+        }
+
+        function restartGame() {
+            totalScore = 0;
+            document.getElementById('totalScore').textContent = '0';
+            document.getElementById('gameComplete').style.display = 'none';
+            remainingWords = [];
+            initGame();
+        }
+
+        // Initialize
+        checkSpeechSupport();
+        initAudio();
+    </script>
+</body>
+</html> 

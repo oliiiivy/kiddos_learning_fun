@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Children's Learning Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Welcome to QUINSTON'S WORLD!</h1>
+            <p>Let's LEARN HARD and PLAY HARD together!</p>
+            
+            <div class="carousel-container">
+                <div class="carousel">
+                    <div class="carousel-slide active">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='300' viewBox='0 0 600 300'%3E%3Crect width='600' height='300' fill='%234ecdc4'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='24' fill='white'%3EDrawing Fun%3C/text%3E%3C/svg%3E" alt="Drawing Fun">
+                    </div>
+                    <div class="carousel-slide">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='300' viewBox='0 0 600 300'%3E%3Crect width='600' height='300' fill='%23ff6b6b'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='24' fill='white'%3ELearn Chinese%3C/text%3E%3C/svg%3E" alt="Learn Chinese">
+                    </div>
+                    <div class="carousel-slide">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='300' viewBox='0 0 600 300'%3E%3Crect width='600' height='300' fill='%23ffd93d'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='24' fill='white'%3EHave Fun Learning!%3C/text%3E%3C/svg%3E" alt="Have Fun Learning">
+                    </div>
+                </div>
+                <button class="carousel-button prev" onclick="moveCarousel(-1)">❮</button>
+                <button class="carousel-button next" onclick="moveCarousel(1)">❯</button>
+                <div class="carousel-dots">
+                    <span class="dot active" onclick="goToSlide(0)"></span>
+                    <span class="dot" onclick="goToSlide(1)"></span>
+                    <span class="dot" onclick="goToSlide(2)"></span>
+                </div>
+            </div>
+        </header>
+        
+        <main>
+            <section class="game-section drawing">
+                <h2>Drawing Fun</h2>
+                <p>Express your creativity with our drawing games!</p>
+                <a href="drawing.html" class="cta-button">Start Drawing</a>
+            </section>
+
+            <section class="game-section themed-drawing">
+                <h2>Weekly Themed Drawing</h2>
+                <p>Practice drawing with fun weekly themes!</p>
+                <a href="themed-drawing.html" class="cta-button">Start Practice</a>
+            </section>
+
+            <section class="game-section chinese">
+                <h2>Learn Chinese</h2>
+                <p>Discover the beauty of Chinese language!</p>
+                <a href="chinese.html" class="cta-button">Start Learning</a>
+            </section>
+        </main>
+
+        <footer>
+            <p>Made with ❤️ for young learners</p>
+        </footer>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.carousel-slide');
+        const dots = document.querySelectorAll('.dot');
+
+        function showSlide(n) {
+            slides.forEach(slide => slide.classList.remove('active'));
+            dots.forEach(dot => dot.classList.remove('active'));
+            
+            currentSlide = (n + slides.length) % slides.length;
+            
+            slides[currentSlide].classList.add('active');
+            dots[currentSlide].classList.add('active');
+        }
+
+        function moveCarousel(direction) {
+            showSlide(currentSlide + direction);
+        }
+
+        function goToSlide(n) {
+            showSlide(n);
+        }
+
+        // Auto-advance slides every 5 seconds
+        setInterval(() => moveCarousel(1), 5000);
+    </script>
+</body>
+</html> 
