@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>幼兒廣東話認字遊戲</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "微軟正黑體", "Heiti TC", "LiHei Pro", sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #ffcdd2 0%, #f8bbd0 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            width: 90%;
+            max-width: 600px;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        h1 {
+            color: #e91e63;
+            margin-bottom: 20px;
+            font-size: 2.2rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .word-card {
+            background: linear-gradient(135deg, #ffeb3b 0%, #ffc107 100%);
+            border-radius: 20px;
+            padding: 40px 20px;
+            margin: 25px 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        #word {
+            font-size: 2.8rem;
+            color: #333;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+        
+        .sound-btn {
+            background: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 1.8rem;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .sound-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+        }
+        
+        .sound-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        button {
+            padding: 15px 30px;
+            font-size: 1.3rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        #correct-btn {
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+            color: white;
+        }
+        
+        #incorrect-btn {
+            background: linear-gradient(135deg, #f44336 0%, #c62828 100%);
+            color: white;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .feedback {
+            margin: 20px 0;
+            min-height: 80px;
+        }
+        
+        #feedback-text {
+            font-size: 1.8rem;
+            color: #e91e63;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .encouragement {
+            font-size: 1.4rem;
+            color: #2196F3;
+            margin-top: 10px;
+        }
+        
+        .score {
+            font-size: 1.2rem;
+            color: #9C27B0;
+            margin-top: 20px;
+        }
+        
+        .stars {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+        }
+        
+        .star {
+            font-size: 2.5rem;
+            color: #FFD700;
+            margin: 0 5px;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.5s ease;
+        }
+        
+        .show-star {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .animation-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        @keyframes celebrate {
+            0% { transform: translateY(0) rotate(0); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+        
+        .celebration {
+            position: absolute;
+            font-size: 2rem;
+            animation: celebrate 1.5s ease-out forwards;
+        }
+        
+        @media (max-width: 600px) {
+            #word {
+                font-size: 2.2rem;
+            }
+            
+            button {
+                padding: 12px 25px;
+                font-size: 1.1rem;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .sound-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>幼兒廣東話認字遊戲</h1>
+        
+        <div class="word-card">
+            <p id="word">你好嗎？</p>
+            <button class="sound-btn" id="sound-btn">🔊</button>
+        </div>
+        
+        <div class="buttons">
+            <button id="correct-btn">讀啱咗 👍</button>
+            <button id="incorrect-btn">要再試 👎</button>
+        </div>
+        
+        <div class="feedback">
+            <p id="feedback-text">按下喇叭圖標聽發音，然後讀出句子</p>
+            <p class="encouragement" id="encouragement">你好叻呀！</p>
+        </div>
+        
+        <div class="stars">
+            <div class="star">⭐</div>
+            <div class="star">⭐</div>
+            <div class="star">⭐</div>
+        </div>
+        
+        <div class="score">
+            <p>今日讀咗: <span id="attempts">0</span> 句 | 讀啱: <span id="correct">0</span> 句</p>
+        </div>
+        
+        <div class="animation-container" id="animation-container"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const wordElement = document.getElementById('word');
+            const soundBtn = document.getElementById('sound-btn');
+            const correctBtn = document.getElementById('correct-btn');
+            const incorrectBtn = document.getElementById('incorrect-btn');
+            const feedbackText = document.getElementById('feedback-text');
+            const encouragementText = document.getElementById('encouragement');
+            const attemptsElement = document.getElementById('attempts');
+            const correctElement = document.getElementById('correct');
+            const stars = document.querySelectorAll('.star');
+            const animationContainer = document.getElementById('animation-container');
+            
+            let attempts = 0;
+            let correct = 0;
+            let currentWordIndex = 0;
+            
+            // 廣東話句子庫
+            const words = [
+                "你好嗎？",
+                "我好好。",
+                "多謝你。",
+                "早晨！",
+                "晚安。",
+                "我好開心。",
+                "你叫咩名？",
+                "我愛你。",
+                "唔該曬！",
+                "小心啲！",
+                "好味道！",
+                "去邊度玩？",
+                "食咗飯未？",
+                "我好攰。",
+                "生日快樂！",
+                "好犀利呀！",
+                "睇電視。",
+                "玩玩具。",
+                "好朋友。",
+                "一家人。"
+            ];
+            
+            // 鼓勵說話庫
+            const encouragements = [
+                "好叻呀！",
+                "真係聰明！",
+                "好聰明嘅寶寶！",
+                "好棒啊！",
+                "繼續努力！",
+                "好聽話！",
+                "真係乖！",
+                "好聰明嘅小朋友！",
+                "讀得好好！",
+                "好標準嘅發音！"
+            ];
+            
+            // 初始化遊戲
+            function initGame() {
+                showRandomWord();
+                updateScore();
+            }
+            
+            // 顯示隨機句子
+            function showRandomWord() {
+                currentWordIndex = Math.floor(Math.random() * words.length);
+                wordElement.textContent = words[currentWordIndex];
+                feedbackText.textContent = "按下喇叭圖標聽發音，然後讀出句子";
+                encouragementText.textContent = "你做得嘅！";
+                
+                // 重置星星
+                stars.forEach(star => {
+                    star.classList.remove('show-star');
+                });
+            }
+            
+            // 更新分數
+            function updateScore() {
+                attemptsElement.textContent = attempts;
+                correctElement.textContent = correct;
+            }
+            
+            // 播放語音
+            function playSpeech() {
+                const word = words[currentWordIndex];
+                const speech = new SpeechSynthesisUtterance(word);
+                
+                // 設置語音參數
+                speech.lang = 'zh-HK'; // 設置為廣東話
+                speech.rate = 0.9; // 稍慢一點的語速，適合幼兒
+                speech.pitch = 1.1; // 稍高音調，更友好
+                
+                // 播放語音
+                window.speechSynthesis.speak(speech);
+                
+                // 更新反饋文本
+                feedbackText.textContent = "跟住讀啦！";
+            }
+            
+            // 顯示慶祝動畫
+            function showCelebration() {
+                const emojis = ["🎉", "⭐", "😊", "👍", "🎈", "👏"];
+                
+                for (let i = 0; i < 20; i++) {
+                    const emoji = document.createElement('div');
+                    emoji.classList.add('celebration');
+                    emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                    
+                    emoji.style.left = Math.random() * 100 + '%';
+                    emoji.style.animationDelay = Math.random() * 0.5 + 's';
+                    
+                    animationContainer.appendChild(emoji);
+                    
+                    // 移除動畫元素
+                    setTimeout(() => {
+                        emoji.remove();
+                    }, 1500);
+                }
+            }
+            
+            // 語音按鈕事件
+            soundBtn.addEventListener('click', function() {
+                playSpeech();
+            });
+            
+            // 答對處理
+            correctBtn.addEventListener('click', function() {
+                attempts++;
+                correct++;
+                
+                feedbackText.textContent = "好嘢！讀得啱！";
+                encouragementText.textContent = encouragements[Math.floor(Math.random() * encouragements.length)];
+                
+                // 顯示星星
+                const starsToShow = Math.min(3, Math.ceil(Math.random() * 3));
+                for (let i = 0; i < starsToShow; i++) {
+                    setTimeout(() => {
+                        stars[i].classList.add('show-star');
+                    }, i * 300);
+                }
+                
+                showCelebration();
+                updateScore();
+                
+                // 2秒後顯示新句子
+                setTimeout(showRandomWord, 2000);
+            });
+            
+            // 答錯處理
+            incorrectBtn.addEventListener('click', function() {
+                attempts++;
+                feedbackText.textContent = "唔緊要，再試多次！";
+                encouragementText.textContent = "你可以嘅！加油！";
+                updateScore();
+                
+                // 重新播放語音
+                playSpeech();
+            });
+            
+            // 開始遊戲
+            initGame();
+        });
+    </script>
+</body>
+</html>
